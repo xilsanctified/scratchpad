@@ -28,21 +28,29 @@ impl Voice {
 }
 struct Oscillator {
     wave_type: Wave,
-    frequency: u32,
+    frequency: Option<i32>,
 }
 impl Oscillator {
     fn new_osc() -> Oscillator {
         Oscillator {
             wave_type: Wave::Saw,
-            frequency: 0,
+            frequency: None,
         }
     }
-
+    fn update(&mut self, freq: Option<i32>) {
+        self.frequency = freq;
+    }
     fn describe(&self) -> String {
         let mut outstr = String::from(&self.wave_type.describe());
-        let freq = &self.frequency.to_string();
+
         outstr.push_str("\nFrequency set to: ");
-        outstr.push_str(freq);
+
+        let freq: String = match &self.frequency {
+            None => String::from("Not Initialized!"),
+            Some(s) => s.to_string(),
+        };
+
+        outstr.push_str(&freq);
         outstr.push_str(".");
         outstr
     }
@@ -50,25 +58,40 @@ impl Oscillator {
 struct Synthesizer {
     osc1: Oscillator,
     osc2: Oscillator,
-    wave: Wave,
     voice: Voice,
 }
 impl Synthesizer {
+    fn new() -> Synthesizer {
+        let new_synth = Synthesizer {
+            osc1: Oscillator::new_osc(),
+            osc2: Oscillator::new_osc(),
+            voice: Voice::Sixteen,
+        };
+        new_synth
+    }
     fn describe(&self) {
         println!("Oscillator 1: {}", self.osc1.describe());
+        println!("Wave Type: {}", self.osc1.wave_type.describe());
         println!("Oscillator 2: {}", self.osc2.describe());
-        println!("Wave Type: {}", self.wave.describe());
+        println!("Wave Type: {}", self.osc2.wave_type.describe());
         println!("Voices: {}", self.voice.describe());
+    }
+    fn initialize(&mut self, freq: Option<i32>) {
+        self.osc1.update(freq);
+        self.osc2.update(freq);
     }
 }
 
 fn main() {
-    let synth = Synthesizer {
-        wave: Wave::Saw,
-        osc1: Oscillator::new_osc(),
-        osc2: Oscillator::new_osc(),
-        voice: Voice::Sixteen,
-    };
+    let mut synth = Synthesizer::new();
+
+    println!("#####################");
+
+    synth.describe();
+
+    synth.initialize(Some(300));
+
+    println!("#####################");
 
     synth.describe();
 }
